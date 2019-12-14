@@ -5,9 +5,9 @@
 
 #pragma once
 
-#include <winsdkver.h>
-#define _WIN32_WINNT 0x0601
-#include <sdkddkver.h>
+#include <WinSDKVer.h>
+#define _WIN32_WINNT 0x0602
+#include <SDKDDKVer.h>
 
 // Use the C++ standard templated min/max
 #define NOMINMAX
@@ -71,6 +71,7 @@
 #include "SpriteFont.h"
 #include "VertexTypes.h"
 #include "WICTextureLoader.h"
+#include "Audio.h"
 
 namespace DX
 {

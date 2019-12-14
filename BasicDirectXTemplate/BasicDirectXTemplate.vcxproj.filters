@@ -34,6 +34,12 @@
     <Image Include="directx.ico">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="roomtexture.dds">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="(1) Planet_Mesh_BaseColor.png">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">
@@ -42,5 +48,11 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Futuristic-Bike.sdkmesh" />
+  </ItemGroup>
+  <ItemGroup>
+    <MeshContentTask Include="Planet.fbx">
+      <Filter>Assets</Filter>
+    </MeshContentTask>
   </ItemGroup>
 </Project>

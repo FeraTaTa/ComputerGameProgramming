@@ -51,6 +51,7 @@ private:
     void CreateWindowSizeDependentResources();
     void RenderAimReticle(ID3D11DeviceContext1* context);
     void AimReticleCreateBatch();
+    void PostProcess();
     // Device resources.
     std::unique_ptr<DX::DeviceResources>    m_deviceResources;
 
@@ -90,7 +91,7 @@ private:
 
     //drawing a model
     std::unique_ptr<DirectX::IEffectFactory> m_fxFactory;
-    std::unique_ptr<DirectX::Model> m_model;
+    std::unique_ptr<DirectX::Model> ship_model;
 
     //roll matrix
     DirectX::SimpleMath::Matrix rollMatrix;
@@ -106,4 +107,36 @@ private:
     bool m_retryAudio;
     std::unique_ptr<DirectX::SoundEffect> m_ambient;
     std::unique_ptr<DirectX::SoundEffectInstance> m_nightLoop;
+
+    // bloom variables
+    //std::unique_ptr<DirectX::CommonStates> m_states;
+    std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
+    ////std::unique_ptr<DirectX::GeometricPrimitive> m_shape;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_background;
+    //DirectX::SimpleMath::Matrix m_world;
+    //DirectX::SimpleMath::Matrix m_view;
+    DirectX::SimpleMath::Matrix m_projection;
+    RECT m_fullscreenRect;
+
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_bloomExtractPS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_bloomCombinePS;
+    Microsoft::WRL::ComPtr<ID3D11PixelShader> m_gaussianBlurPS;
+
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_bloomParams;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_blurParamsWidth;
+    Microsoft::WRL::ComPtr<ID3D11Buffer> m_blurParamsHeight;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_backBuffer;
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> m_sceneTex;
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_sceneSRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_sceneRT;
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_rt1SRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_rt1RT;
+
+    Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> m_rt2SRV;
+    Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_rt2RT;
+
+    RECT m_bloomRect;
 };

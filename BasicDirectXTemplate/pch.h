@@ -72,6 +72,7 @@
 #include "VertexTypes.h"
 #include "WICTextureLoader.h"
 #include "Audio.h"
+#include "ReadData.h"
 
 namespace DX
 {

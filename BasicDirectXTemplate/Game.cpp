@@ -18,6 +18,111 @@ float toRadians = pi / 180.0f;
 
 namespace
 {
+    struct VS_BLOOM_PARAMETERS
+    {
+        float bloomThreshold;
+        float blurAmount;
+        float bloomIntensity;
+        float baseIntensity;
+        float bloomSaturation;
+        float baseSaturation;
+        uint8_t na[8];
+    };
+
+    static_assert(!(sizeof(VS_BLOOM_PARAMETERS) % 16),
+        "VS_BLOOM_PARAMETERS needs to be 16 bytes aligned");
+
+    struct VS_BLUR_PARAMETERS
+    {
+        static const size_t SAMPLE_COUNT = 15;
+
+        XMFLOAT4 sampleOffsets[SAMPLE_COUNT];
+        XMFLOAT4 sampleWeights[SAMPLE_COUNT];
+
+        void SetBlurEffectParameters(float dx, float dy,
+            const VS_BLOOM_PARAMETERS& params)
+        {
+            sampleWeights[0].x = ComputeGaussian(0, params.blurAmount);
+            sampleOffsets[0].x = sampleOffsets[0].y = 0.f;
+
+            float totalWeights = sampleWeights[0].x;
+
+            // Add pairs of additional sample taps, positioned
+            // along a line in both directions from the center.
+            for (size_t i = 0; i < SAMPLE_COUNT / 2; i++)
+            {
+                // Store weights for the positive and negative taps.
+                float weight = ComputeGaussian(float(i + 1.f), params.blurAmount);
+
+                sampleWeights[i * 2 + 1].x = weight;
+                sampleWeights[i * 2 + 2].x = weight;
+
+                totalWeights += weight * 2;
+
+                // To get the maximum amount of blurring from a limited number of
+                // pixel shader samples, we take advantage of the bilinear filtering
+                // hardware inside the texture fetch unit. If we position our texture
+                // coordinates exactly halfway between two texels, the filtering unit
+                // will average them for us, giving two samples for the price of one.
+                // This allows us to step in units of two texels per sample, rather
+                // than just one at a time. The 1.5 offset kicks things off by
+                // positioning us nicely in between two texels.
+                float sampleOffset = float(i) * 2.f + 1.5f;
+
+                Vector2 delta = Vector2(dx, dy) * sampleOffset;
+
+                // Store texture coordinate offsets for the positive and negative taps.
+                sampleOffsets[i * 2 + 1].x = delta.x;
+                sampleOffsets[i * 2 + 1].y = delta.y;
+                sampleOffsets[i * 2 + 2].x = -delta.x;
+                sampleOffsets[i * 2 + 2].y = -delta.y;
+            }
+
+            for (size_t i = 0; i < SAMPLE_COUNT; i++)
+            {
+                sampleWeights[i].x /= totalWeights;
+            }
+        }
+
+    private:
+        float ComputeGaussian(float n, float theta)
+        {
+            return (float)((1.0 / sqrtf(2 * XM_PI * theta))
+                * expf(-(n * n) / (2 * theta * theta)));
+        }
+    };
+
+    static_assert(!(sizeof(VS_BLUR_PARAMETERS) % 16),
+        "VS_BLUR_PARAMETERS needs to be 16 bytes aligned");
+
+    enum BloomPresets
+    {
+        Default = 0,
+        Soft,
+        Desaturated,
+        Saturated,
+        Blurry,
+        Subtle,
+        None
+    };
+
+    BloomPresets g_Bloom = Soft;
+
+    static const VS_BLOOM_PARAMETERS g_BloomPresets[] =
+    {
+        //Thresh  Blur Bloom  Base  BloomSat BaseSat
+        { 0.25f,  4,   1.25f, 1,    1,       1 }, // Default
+        { 0,      3,   1,     1,    1,       1 }, // Soft
+        { 0.5f,   8,   2,     1,    0,       1 }, // Desaturated
+        { 0.25f,  4,   2,     1,    2,       0 }, // Saturated
+        { 0,      2,   1,     0.1f, 1,       1 }, // Blurry
+        { 0.5f,   2,   1,     1,    1,       1 }, // Subtle
+        { 0.25f,  4,   1.25f, 1,    1,       1 }, // None
+    };
+}
+
+namespace
+{
     const XMVECTORF32 START_POSITION = { 0.f, 0.f, -5.f, 0.f };
     const XMVECTORF32 ROOM_BOUNDS = { 8.f, 6.f, 12.f, 0.f };
     const float ROTATION_GAIN = 0.01f;
@@ -51,6 +156,16 @@ void Game::Initialize(HWND window, int width, int height)
     CreateDeviceDependentResources();
 
     m_deviceResources->CreateWindowSizeDependentResources();
+
+
+    DX::ThrowIfFailed(m_deviceResources->GetSwapChain()->GetBuffer(0, __uuidof(ID3D11Texture2D),
+        &m_backBuffer));
+
+    auto rendertarget = m_deviceResources->GetRenderTargetView();
+    // Setting renderTargetView
+    DX::ThrowIfFailed(m_deviceResources->GetD3DDevice()->CreateRenderTargetView(m_backBuffer.Get(), nullptr,
+        &rendertarget));
+    
     CreateWindowSizeDependentResources();
 
 
@@ -252,6 +367,11 @@ void Game::Render()
     XMVECTOR lookAt = m_cameraPos + Vector3(x, y, z);
 
     XMMATRIX view = XMMatrixLookAtRH(m_cameraPos, lookAt, Vector3::Up);
+
+    m_spriteBatch->Begin();
+    m_spriteBatch->Draw(m_background.Get(), m_fullscreenRect);
+    m_spriteBatch->End();
+
     //m_room->Draw(m_world, view, m_proj, Colors::White, m_roomTex.Get()); 
     m_world = Matrix::Identity;
     //sun draw
@@ -283,16 +403,15 @@ void Game::Render()
     //m_world *= Matrix::CreateRotationZ(45.f * toRadians);
     //m_world *= Matrix::CreateRotationX(15.0f * toRadians);
     //m_model->UpdateEffects(m_effect);
-
-
-    m_model->Draw(context, *m_states, m_world, m_view, m_proj);
+    ship_model->Draw(context, *m_states, m_world, m_view, m_proj);
     m_world = Matrix::Identity;
+
 
     RenderAimReticle(context);
     context;
 
     m_deviceResources->PIXEndEvent();
-
+    PostProcess();
     // Show the new frame.
     m_deviceResources->Present();
 }
@@ -308,8 +427,13 @@ void Game::Clear()
     auto depthStencil = m_deviceResources->GetDepthStencilView();
 
     context->ClearRenderTargetView(renderTarget, Colors::Black);
-    context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
-    context->OMSetRenderTargets(1, &renderTarget, depthStencil);
+    context->ClearDepthStencilView(m_deviceResources->GetDepthStencilView(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    // Using new RenderTarget here
+    context->OMSetRenderTargets(1, m_sceneRT.GetAddressOf(), m_deviceResources->GetDepthStencilView());
+
+    //context->ClearRenderTargetView(renderTarget, Colors::Black);
+    //context->ClearDepthStencilView(depthStencil, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f, 0);
+    //context->OMSetRenderTargets(1, m_sceneRT.GetAddressOf(), depthStencil);
 
     // Set the viewport.
     auto viewport = m_deviceResources->GetScreenViewport();
@@ -433,7 +557,7 @@ void Game::CreateDeviceDependentResources()
     //m_model = Model::CreateFromSDKMESH(device, L"Sun/Planet.sdkmesh", *m_fxFactory);
     //m_model = Model::CreateFromSDKMESH(device, L"Futuristic-Bike.sdkmesh", *m_fxFactory);
     //m_model->UpdateEffects(&effectBuilt);
-    m_model = Model::CreateFromSDKMESH(device, L"Spaceship/ND Spaceship.sdkmesh", *m_fxFactory);
+    ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ND Spaceship.sdkmesh", *m_fxFactory);
 
     //DX::ThrowIfFailed(
     //    CreateWICTextureFromFile(device, L"Sun/Sun_Mesh_Emissive.png", nullptr,
@@ -489,7 +613,47 @@ void Game::CreateDeviceDependentResources()
         CreateDDSTextureFromFile(device, L"roomtexture.dds",
             nullptr, m_roomTex.ReleaseAndGetAddressOf()));
 
+    //shader setup
+    DX::ThrowIfFailed(CreateWICTextureFromFile(device,
+        L"sunset.jpg", nullptr,
+        m_background.ReleaseAndGetAddressOf()));
 
+    //m_states = std::make_unique<CommonStates>(device);
+    m_spriteBatch = std::make_unique<SpriteBatch>(context);
+    //m_shape = GeometricPrimitive::CreateTorus(context);
+    auto blob = DX::ReadData(L"BloomExtract.cso");
+    DX::ThrowIfFailed(device->CreatePixelShader(blob.data(), blob.size(),
+        nullptr, m_bloomExtractPS.ReleaseAndGetAddressOf()));
+
+    blob = DX::ReadData(L"BloomCombine.cso");
+    DX::ThrowIfFailed(device->CreatePixelShader(blob.data(), blob.size(),
+        nullptr, m_bloomCombinePS.ReleaseAndGetAddressOf()));
+
+    blob = DX::ReadData(L"GaussianBlur.cso");
+    DX::ThrowIfFailed(device->CreatePixelShader(blob.data(), blob.size(),
+        nullptr, m_gaussianBlurPS.ReleaseAndGetAddressOf()));
+
+    {
+        CD3D11_BUFFER_DESC cbDesc(sizeof(VS_BLOOM_PARAMETERS),
+            D3D11_BIND_CONSTANT_BUFFER);
+        D3D11_SUBRESOURCE_DATA initData;
+        initData.pSysMem = &g_BloomPresets[g_Bloom];
+        initData.SysMemPitch = sizeof(VS_BLOOM_PARAMETERS);
+        DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, &initData,
+            m_bloomParams.ReleaseAndGetAddressOf()));
+    }
+
+    {
+        CD3D11_BUFFER_DESC cbDesc(sizeof(VS_BLUR_PARAMETERS),
+            D3D11_BIND_CONSTANT_BUFFER);
+        DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
+            m_blurParamsWidth.ReleaseAndGetAddressOf()));
+        DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
+            m_blurParamsHeight.ReleaseAndGetAddressOf()));
+    }
+
+    m_view = Matrix::CreateLookAt(Vector3(0.f, 3.f, -3.f),
+        Vector3::Zero, Vector3::UnitY);
 
     //AimReticleCreateBatch();
     m_world = Matrix::Identity;
@@ -500,7 +664,10 @@ void Game::CreateDeviceDependentResources()
 // Allocate all memory resources that change on a window SizeChanged event.
 void Game::CreateWindowSizeDependentResources()
 {
+    auto backBufferFormat = m_deviceResources->GetBackBufferFormat();
     // TODO: Initialize windows-size dependent objects here.
+    auto device = m_deviceResources->GetD3DDevice();
+    auto context = m_deviceResources->GetD3DDeviceContext();
     auto size = m_deviceResources->GetOutputSize();
     rollMatrix = Matrix::Identity;
 
@@ -517,6 +684,59 @@ void Game::CreateWindowSizeDependentResources()
     //ball lighting
     m_effect->SetView(m_view);
     m_effect->SetProjection(m_proj);
+
+    m_fullscreenRect.left = 0;
+    m_fullscreenRect.top = 0;
+    m_fullscreenRect.right = size.right;
+    m_fullscreenRect.bottom = size.bottom;
+
+    m_projection = Matrix::CreatePerspectiveFieldOfView(XM_PIDIV4,
+        float(size.right) / float(size.bottom), 0.01f, 100.f);
+
+    VS_BLUR_PARAMETERS blurData;
+    blurData.SetBlurEffectParameters(1.f / (size.right / 2), 0,
+        g_BloomPresets[g_Bloom]);
+    context->UpdateSubresource(m_blurParamsWidth.Get(), 0, nullptr,
+        &blurData, sizeof(VS_BLUR_PARAMETERS), 0);
+
+    blurData.SetBlurEffectParameters(0, 1.f / (size.bottom / 2),
+        g_BloomPresets[g_Bloom]);
+    context->UpdateSubresource(m_blurParamsHeight.Get(), 0, nullptr,
+        &blurData, sizeof(VS_BLUR_PARAMETERS), 0);
+
+    // Full-size render target for scene
+    CD3D11_TEXTURE2D_DESC sceneDesc(backBufferFormat, size.right, size.bottom,
+        1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+    DX::ThrowIfFailed(device->CreateTexture2D(&sceneDesc, nullptr,
+        m_sceneTex.GetAddressOf()));
+    DX::ThrowIfFailed(device->CreateRenderTargetView(m_sceneTex.Get(), nullptr,
+        m_sceneRT.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(device->CreateShaderResourceView(m_sceneTex.Get(), nullptr,
+        m_sceneSRV.ReleaseAndGetAddressOf()));
+
+    // Half-size blurring render targets
+    CD3D11_TEXTURE2D_DESC rtDesc(backBufferFormat, size.right / 2, size.bottom/ 2,
+        1, 1, D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE);
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> rtTexture1;
+    DX::ThrowIfFailed(device->CreateTexture2D(&rtDesc, nullptr,
+        rtTexture1.GetAddressOf()));
+    DX::ThrowIfFailed(device->CreateRenderTargetView(rtTexture1.Get(), nullptr,
+        m_rt1RT.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(device->CreateShaderResourceView(rtTexture1.Get(), nullptr,
+        m_rt1SRV.ReleaseAndGetAddressOf()));
+
+    Microsoft::WRL::ComPtr<ID3D11Texture2D> rtTexture2;
+    DX::ThrowIfFailed(device->CreateTexture2D(&rtDesc, nullptr,
+        rtTexture2.GetAddressOf()));
+    DX::ThrowIfFailed(device->CreateRenderTargetView(rtTexture2.Get(), nullptr,
+        m_rt2RT.ReleaseAndGetAddressOf()));
+    DX::ThrowIfFailed(device->CreateShaderResourceView(rtTexture2.Get(), nullptr,
+        m_rt2SRV.ReleaseAndGetAddressOf()));
+
+    m_bloomRect.left = 0;
+    m_bloomRect.top = 0;
+    m_bloomRect.right = size.right / 2;
+    m_bloomRect.bottom = size.bottom / 2;
 }
 
 void Game::OnDeviceLost()
@@ -529,7 +749,7 @@ void Game::OnDeviceLost()
 
     m_states.reset();
     m_fxFactory.reset();
-    m_model.reset();
+    ship_model.reset();
 
     m_room.reset();
     m_roomTex.Reset();
@@ -537,6 +757,27 @@ void Game::OnDeviceLost()
 
     m_effect.reset();
     m_inputLayout.Reset();
+
+    //m_states.reset();
+    m_spriteBatch.reset();
+    //m_shape.reset();
+    m_background.Reset();
+    m_bloomExtractPS.Reset();
+    m_bloomCombinePS.Reset();
+    m_gaussianBlurPS.Reset();
+
+    m_bloomParams.Reset();
+    m_blurParamsWidth.Reset();
+    m_blurParamsHeight.Reset();
+
+    m_sceneTex.Reset();
+    m_sceneSRV.Reset();
+    m_sceneRT.Reset();
+    m_rt1SRV.Reset();
+    m_rt1RT.Reset();
+    m_rt2SRV.Reset();
+    m_rt2RT.Reset();
+    m_backBuffer.Reset();
 }
 
 void Game::OnDeviceRestored()
@@ -615,5 +856,71 @@ void Game::AimReticleCreateBatch() {
     Matrix proj = Matrix::CreateScale(2.0f / widthWin, -2.0f / heightWin, 1.0f) * Matrix::CreateTranslation(-1.0f, 1.0f, 0.0f);
     mReticle_effect->SetProjection(proj);
     // End initializing state and effects for Triangle Render
+}
+void Game::PostProcess()
+{
+    auto device = m_deviceResources->GetD3DDevice();
+    auto context = m_deviceResources->GetD3DDeviceContext();
+    auto renderTarget = m_deviceResources->GetRenderTargetView();
+    ID3D11ShaderResourceView* null[] = { nullptr, nullptr };
+
+    if (g_Bloom == None)
+    {
+        // Pass-through test
+        context->CopyResource(m_backBuffer.Get(), m_sceneTex.Get());
+    }
+    else
+    {
+        // scene -> RT1 (downsample)
+        context->OMSetRenderTargets(1, m_rt1RT.GetAddressOf(), nullptr);
+        m_spriteBatch->Begin(SpriteSortMode_Immediate,
+            nullptr, nullptr, nullptr, nullptr,
+            [=]() {
+            context->PSSetConstantBuffers(0, 1, m_bloomParams.GetAddressOf());
+            context->PSSetShader(m_bloomExtractPS.Get(), nullptr, 0);
+        });
+        m_spriteBatch->Draw(m_sceneSRV.Get(), m_bloomRect);
+        m_spriteBatch->End();
+
+        // RT1 -> RT2 (blur horizontal)
+        context->OMSetRenderTargets(1, m_rt2RT.GetAddressOf(), nullptr);
+        m_spriteBatch->Begin(SpriteSortMode_Immediate,
+            nullptr, nullptr, nullptr, nullptr,
+            [=]() {
+            context->PSSetShader(m_gaussianBlurPS.Get(), nullptr, 0);
+            context->PSSetConstantBuffers(0, 1,
+                m_blurParamsWidth.GetAddressOf());
+        });
+        m_spriteBatch->Draw(m_rt1SRV.Get(), m_bloomRect);
+        m_spriteBatch->End();
+
+        context->PSSetShaderResources(0, 2, null);
+
+        // RT2 -> RT1 (blur vertical)
+        context->OMSetRenderTargets(1, m_rt1RT.GetAddressOf(), nullptr);
+        m_spriteBatch->Begin(SpriteSortMode_Immediate,
+            nullptr, nullptr, nullptr, nullptr,
+            [=]() {
+            context->PSSetShader(m_gaussianBlurPS.Get(), nullptr, 0);
+            context->PSSetConstantBuffers(0, 1,
+                m_blurParamsHeight.GetAddressOf());
+        });
+        m_spriteBatch->Draw(m_rt2SRV.Get(), m_bloomRect);
+        m_spriteBatch->End();
+
+        // RT1 + scene
+        context->OMSetRenderTargets(1, &renderTarget, nullptr);
+        m_spriteBatch->Begin(SpriteSortMode_Immediate,
+            nullptr, nullptr, nullptr, nullptr,
+            [=]() {
+            context->PSSetShader(m_bloomCombinePS.Get(), nullptr, 0);
+            context->PSSetShaderResources(1, 1, m_rt1SRV.GetAddressOf());
+            context->PSSetConstantBuffers(0, 1, m_bloomParams.GetAddressOf());
+        });
+        m_spriteBatch->Draw(m_sceneSRV.Get(), m_fullscreenRect);
+        m_spriteBatch->End();
+    }
+
+    context->PSSetShaderResources(0, 2, null);
 }
 #pragma endregion

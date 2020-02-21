@@ -18,6 +18,7 @@
     <ClInclude Include="DeviceResources.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="ReadData.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -49,10 +50,16 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Futuristic-Bike.sdkmesh" />
+    <None Include="Bloom.hlsli" />
   </ItemGroup>
   <ItemGroup>
     <MeshContentTask Include="Planet.fbx">
       <Filter>Assets</Filter>
     </MeshContentTask>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="GaussianBlur.hlsl" />
+    <FxCompile Include="BloomCombine.hlsl" />
+    <FxCompile Include="BloomExtract.hlsl" />
   </ItemGroup>
 </Project>

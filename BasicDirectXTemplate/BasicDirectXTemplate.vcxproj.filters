@@ -62,5 +62,6 @@
     <FxCompile Include="GaussianBlur.hlsl" />
     <FxCompile Include="BloomCombine.hlsl" />
     <FxCompile Include="BloomExtract.hlsl" />
+    <FxCompile Include="Effects.fx" />
   </ItemGroup>
 </Project>

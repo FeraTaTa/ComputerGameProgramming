@@ -107,7 +107,9 @@ private:
     bool m_retryAudio;
     std::unique_ptr<DirectX::SoundEffect> m_ambient;
     std::unique_ptr<DirectX::SoundEffectInstance> m_nightLoop;
-
+    //Text
+    std::unique_ptr<DirectX::SpriteFont> m_font;
+    DirectX::SimpleMath::Vector2 m_fontPos;
     // bloom variables
     //std::unique_ptr<DirectX::CommonStates> m_states;
     std::unique_ptr<DirectX::SpriteBatch> m_spriteBatch;
@@ -139,4 +141,5 @@ private:
     Microsoft::WRL::ComPtr<ID3D11RenderTargetView> m_rt2RT;
 
     RECT m_bloomRect;
+
 };

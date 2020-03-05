@@ -526,9 +526,6 @@ void Game::CreateDeviceDependentResources()
     auto size = m_deviceResources->GetOutputSize();
     // TODO: Initialize device dependent objects here (independent of window size).
     //adding a model of motorbike
-    DualEffect = std::make_unique<DualTextureEffect>(device);
-    DualEffect->SetVertexColorEnabled(true);
-    fxFactory = std::make_unique<EffectFactory>(device);
     m_fxFactory = std::make_unique<EffectFactory>(device);
     m_states = std::make_unique<CommonStates>(device);
     m_fxFactory = std::make_unique<EffectFactory>(device);
@@ -578,7 +575,10 @@ void Game::CreateDeviceDependentResources()
     //m_model = Model::CreateFromSDKMESH(device, L"Sun/Planet.sdkmesh", *m_fxFactory);
     //m_model = Model::CreateFromSDKMESH(device, L"Futuristic-Bike.sdkmesh", *m_fxFactory);
     //m_model->UpdateEffects(&effectBuilt);
-    ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ND Spaceship.sdkmesh", *m_fxFactory);
+
+    //ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ND Spaceship.sdkmesh", *m_fxFactory);
+    ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ship.sdkmesh", *m_fxFactory,true);
+    //ship_model = Model::CreateFromCMO(device, L"Spaceship/ship.cmo", *m_fxFactory,false);
 
     //DX::ThrowIfFailed(
     //    CreateWICTextureFromFile(device, L"Sun/Sun_Mesh_Emissive.png", nullptr,

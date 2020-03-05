@@ -176,7 +176,7 @@ namespace
 namespace
 {
     const XMVECTORF32 START_POSITION = { 0.f, 0.f, -5.f, 0.f };
-    const XMVECTORF32 ROOM_BOUNDS = { 8.f, 6.f, 12.f, 0.f };
+    const XMVECTORF32 ROOM_BOUNDS = { 50.f, 50.f, 50.f, 0.f };
     const float ROTATION_GAIN = 0.01f;
     const float MOVEMENT_GAIN = 0.07f;
 }
@@ -355,11 +355,11 @@ void Game::Update(DX::StepTimer const& timer)
 
     m_cameraPos += move;
     //TODOF CAM BOUNDS
-    //Vector3 halfBound = (Vector3(ROOM_BOUNDS.v) / Vector3(2.f))
-    //    - Vector3(0.1f, 0.1f, 0.1f);
+    Vector3 halfBound = (Vector3(ROOM_BOUNDS.v) / Vector3(2.f))
+        - Vector3(0.1f, 0.1f, 0.1f);
 
-    //m_cameraPos = Vector3::Min(m_cameraPos, halfBound);
-    //m_cameraPos = Vector3::Max(m_cameraPos, -halfBound);
+    m_cameraPos = Vector3::Min(m_cameraPos, halfBound);
+    m_cameraPos = Vector3::Max(m_cameraPos, -halfBound);
 
     
     //Reset Lights Position

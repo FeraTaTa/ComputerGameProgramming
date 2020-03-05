@@ -654,7 +654,7 @@ void Game::CreateDeviceDependentResources()
     //m_model->UpdateEffects(&effectBuilt);
 
     //ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ND Spaceship.sdkmesh", *m_fxFactory);
-    ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ship.sdkmesh", *m_fxFactory,true);
+    ship_model = Model::CreateFromSDKMESH(device, L"Spaceship/ship.sdkmesh", *m_fxFactory);
     //ship_model = Model::CreateFromCMO(device, L"Spaceship/ship.cmo", *m_fxFactory,false);
 
     //DX::ThrowIfFailed(

@@ -135,6 +135,7 @@
     <None Include="packages.config" />
     <None Include="Futuristic-Bike.sdkmesh" />
     <None Include="Bloom.hlsli" />
+    <None Include="Font\myfile.spritefont" />
   </ItemGroup>
   <ItemGroup>
     <MeshContentTask Include="Planet.fbx">

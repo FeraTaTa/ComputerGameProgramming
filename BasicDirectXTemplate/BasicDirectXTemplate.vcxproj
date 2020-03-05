@@ -221,6 +221,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Bloom.hlsli" />
+    <None Include="Font\myfile.spritefont" />
     <None Include="Futuristic-Bike.sdkmesh" />
     <None Include="packages.config" />
   </ItemGroup>

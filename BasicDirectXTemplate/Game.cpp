@@ -16,6 +16,58 @@ float rotation = 0;
 float pi = 3.14159265359f;
 float toRadians = pi / 180.0f;
 
+namespace 
+{
+    //Create effects constant buffer's structure//
+    struct cbPerObject
+    {
+        XMMATRIX  WVP;
+        XMMATRIX  World;
+    };
+
+    cbPerObject cbPerObj;
+
+    struct Light
+    {
+        Light()
+        {
+            ZeroMemory(this, sizeof(Light));
+        }
+        XMFLOAT3 dir;
+        float pad1;
+        ///////////////**************new**************////////////////////
+        XMFLOAT3 pos;
+        float range;
+        XMFLOAT3 att;
+        float pad2;
+        ///////////////**************new**************////////////////////
+        XMFLOAT4 ambient;
+        XMFLOAT4 diffuse;
+    };
+
+    Light light;
+
+    struct cbPerFrame
+    {
+        Light  light;
+    };
+
+    cbPerFrame constbuffPerFrame;
+
+    //Vertex Structure and Vertex Layout (Input Layout)//
+    struct Vertex    //Overloaded Vertex Structure
+    {
+        Vertex() {}
+        Vertex(float x, float y, float z,
+            float u, float v,
+            float nx, float ny, float nz)
+            : pos(x, y, z), texCoord(u, v), normal(nx, ny, nz) {}
+
+        XMFLOAT3 pos;
+        XMFLOAT2 texCoord;
+        XMFLOAT3 normal;
+    };
+}
 namespace
 {
     struct VS_BLOOM_PARAMETERS
@@ -308,6 +360,17 @@ void Game::Update(DX::StepTimer const& timer)
 
     //m_cameraPos = Vector3::Min(m_cameraPos, halfBound);
     //m_cameraPos = Vector3::Max(m_cameraPos, -halfBound);
+
+    
+    //Reset Lights Position
+    //XMVECTOR lightVector = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+    //lightVector = XMVector3TransformCoord(lightVector, cube1World);
+
+    //light.pos.x = XMVectorGetX(lightVector);
+    //light.pos.y = XMVectorGetY(lightVector);
+    //light.pos.z = XMVectorGetZ(lightVector);
+    
     AudioListener listener;
     listener.SetPosition(m_cameraPos);
 
@@ -371,7 +434,6 @@ void Game::Render()
     m_spriteBatch->Begin();
     m_spriteBatch->Draw(m_background.Get(), m_fullscreenRect);
     m_spriteBatch->End();
-
     //m_room->Draw(m_world, view, m_proj, Colors::White, m_roomTex.Get()); 
     m_world = Matrix::Identity;
     //sun draw
@@ -400,33 +462,37 @@ void Game::Render()
     //m_world *= Matrix::CreateScale(0.0005f);
     //m_world *= Matrix::CreateTranslation(0.0f, -1.0f, 1.0f);
     //m_world *= Matrix::CreateRotationY(45.f * toRadians);
+    //Matrix m_lightRot = Matrix::CreateTranslation(0.0f, 1.0f, -1.0f) * Matrix::CreateFromYawPitchRoll(-m_yaw, -m_pitch, -45.f* toRadians);
+    //m_lightRot = m_lightRot * Matrix::CreateTranslation(0.0f, -1.0f, 1.0f);
 
-    //m_world *= Matrix::CreateRotationZ(45.f * toRadians);
-    //m_world *= Matrix::CreateRotationX(15.0f * toRadians);
-    //m_model->UpdateEffects(m_effect);
-
-    //Quaternion q;
-
-    ship_model->UpdateEffects([&](IEffect* effect)
-    {
-        auto lights = dynamic_cast<IEffectLights*>(effect);
-        if (lights)
-        {
+    auto quat = Quaternion::CreateFromYawPitchRoll(-m_yaw, -m_pitch, -45.f * toRadians);
+    Vector3 lightDir = XMVector3Rotate(Vector3(-m_cameraPos.x, -m_cameraPos.y, -m_cameraPos.z), quat);
+    ship_model->UpdateEffects([&](IEffect* effect) {
+        auto lights = dynamic_cast<IEffectLights*> (effect);
+        if (lights) {
             lights->SetLightEnabled(0, true);
-            //XMVECTOR dir = XMVector3Rotate(g_XMOne, q);
-            //lights->SetLightDirection(0, -(m_cameraPos + Vector3(x, y, z)) + Vector3(0.0f, -1.0f, 1.0f));
-            lights->SetLightDirection(0,  Vector3(0,-1,0));
-            lights->SetAmbientLightColor(Colors::Blue);
-            lights->SetLightDiffuseColor(0, Colors::White);
+
+            lights->SetLightDirection(0, lightDir);
+
+            float lightDistance = 1 / sqrt(m_cameraPos.x * m_cameraPos.x + m_cameraPos.y * m_cameraPos.y + m_cameraPos.z * m_cameraPos.z);
+            lights->SetLightDiffuseColor(0, Vector3(lightDistance, lightDistance, lightDistance));
+
         }
     });
-
-    //ship_model->Draw(context, *m_states, m_world, m_view, m_proj);
     ship_model->Draw(context, *m_states, m_world, view, m_proj);
     m_world = Matrix::Identity;
 
+    std::wstring output = L"x:" + std::to_wstring(lightDir.x) + L" y:" + std::to_wstring(lightDir.y) + L" z:" + std::to_wstring(lightDir.z)
+        + L" pitch:" + std::to_wstring(m_pitch) + L" yaw:" + std::to_wstring(m_yaw);
+    m_spriteBatch->Begin();
+    Vector2 origin = m_font->MeasureString(output.c_str()) / 2.f;
+    m_font->DrawString(m_spriteBatch.get(), output.c_str(),
+        m_fontPos, Colors::White, 0.f, origin);
+    m_spriteBatch->End();
+
 
     RenderAimReticle(context);
+
     context;
 
     m_deviceResources->PIXEndEvent();
@@ -532,6 +598,8 @@ void Game::CreateDeviceDependentResources()
     PBReffect = std::make_unique<PBREffect>(device);
     PBRfxFactory = std::make_unique<PBREffectFactory>(device);
     PBReffect->SetLightEnabled(0, true);
+    m_font = std::make_unique<SpriteFont>(device, L"Font/myfile.spritefont");
+    m_spriteBatch = std::make_unique<SpriteBatch>(context);
     //PBRfxFactory->
     //iEffect = std::make_unique<IEffect>(device);
     EffectFactory::EffectInfo info;
@@ -558,7 +626,10 @@ void Game::CreateDeviceDependentResources()
     m_effectSun->SetLightingEnabled(true);
     m_effectSun->SetLightEnabled(0, true);
     m_effectSun->SetLightDiffuseColor(0, Colors::Orange);
-    m_effectSun->SetLightDirection(0, Vector3(1,1,1));
+    m_effectSun->SetLightDirection(0, Vector3(1, 1, 1));
+    m_effectSun->SetLightEnabled(1, true);
+    m_effectSun->SetLightDiffuseColor(1, Colors::Orange);
+    m_effectSun->SetLightDirection(1, -Vector3(1, 1, 1));
 
     m_effectAsteroid = std::make_unique<BasicEffect>(device);
     m_effectAsteroid->SetTextureEnabled(true);
@@ -569,7 +640,6 @@ void Game::CreateDeviceDependentResources()
     m_effectAsteroid->SetLightDirection(0, Vector3::UnitX);
 
     
-    //m_fxFactory->CreateTexture(L"Sun/Sun_Mesh_BaseColor.png", nullptr, m_sunTex.ReleaseAndGetAddressOf());
     //m_effect->SetTexture(m_sunTex.Get());
     //effect->SetIBLTextures(m_sunTex.ReleaseAndGetAddressOf(),0, nullptr );
     //m_model = Model::CreateFromSDKMESH(device, L"Sun/Planet.sdkmesh", *m_fxFactory);
@@ -640,7 +710,6 @@ void Game::CreateDeviceDependentResources()
         m_background.ReleaseAndGetAddressOf()));
 
     //m_states = std::make_unique<CommonStates>(device);
-    m_spriteBatch = std::make_unique<SpriteBatch>(context);
     //m_shape = GeometricPrimitive::CreateTorus(context);
     auto blob = DX::ReadData(L"BloomExtract.cso");
     DX::ThrowIfFailed(device->CreatePixelShader(blob.data(), blob.size(),
@@ -693,6 +762,8 @@ void Game::CreateWindowSizeDependentResources()
     m_view = Matrix::CreateLookAt(Vector3(2.f, 2.f, 2.f),
         Vector3::Zero, Vector3::UnitY);
 
+    m_fontPos.x = size.right / 4.f;
+    m_fontPos.y = size.bottom*3 / 4.f;
 
     m_proj = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(70.f),
         float(size.right) / float(size.bottom), 0.01f, 100.f);
@@ -796,6 +867,8 @@ void Game::OnDeviceLost()
     m_rt2SRV.Reset();
     m_rt2RT.Reset();
     m_backBuffer.Reset();
+
+    m_font.reset();
 }
 
 void Game::OnDeviceRestored()

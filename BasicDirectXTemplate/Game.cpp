@@ -158,7 +158,7 @@ namespace
         None
     };
 
-    BloomPresets g_Bloom = Soft;
+    BloomPresets g_Bloom = Saturated;
 
     static const VS_BLOOM_PARAMETERS g_BloomPresets[] =
     {

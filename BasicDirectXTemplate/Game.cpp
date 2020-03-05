@@ -483,6 +483,11 @@ void Game::Render()
 
             float lightDistance = 1 / sqrt(m_cameraPos.x * m_cameraPos.x + m_cameraPos.y * m_cameraPos.y + m_cameraPos.z * m_cameraPos.z);
             lights->SetLightDiffuseColor(0, Vector3(lightDistance, lightDistance, lightDistance));
+            
+            lights->SetLightEnabled(1, true);
+            lights->SetAmbientLightColor(Colors::LightGoldenrodYellow);
+            
+            lights->SetLightDirection(1, Vector3(0,-1,1));
 
         }
     });
@@ -650,7 +655,7 @@ void Game::CreateDeviceDependentResources()
     m_effectSun->SetLightEnabled(2, true);
     m_effectSun->SetLightDiffuseColor(2, Colors::Orange);
     m_effectSun->SetLightDirection(2, Vector3(-1, 0, 0.577f));
-
+    
     m_effectAsteroid = std::make_unique<BasicEffect>(device);
     m_effectAsteroid->SetTextureEnabled(true);
     m_effectAsteroid->SetPerPixelLighting(true);

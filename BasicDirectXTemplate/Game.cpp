@@ -482,7 +482,9 @@ void Game::Render()
     ship_model->Draw(context, *m_states, m_world, view, m_proj);
     m_world = Matrix::Identity;
 
-    std::wstring output = L"x:" + std::to_wstring(lightDir.x) + L" y:" + std::to_wstring(lightDir.y) + L" z:" + std::to_wstring(lightDir.z)
+    //std::wstring output = L"x:" + std::to_wstring(lightDir.x) + L" y:" + std::to_wstring(lightDir.y) + L" z:" + std::to_wstring(lightDir.z)
+    //    + L" pitch:" + std::to_wstring(m_pitch) + L" yaw:" + std::to_wstring(m_yaw);
+    std::wstring output = L"x:" + std::to_wstring(m_cameraPos.x) + L" y:" + std::to_wstring(m_cameraPos.y) + L" z:" + std::to_wstring(m_cameraPos.z)
         + L" pitch:" + std::to_wstring(m_pitch) + L" yaw:" + std::to_wstring(m_yaw);
     m_spriteBatch->Begin();
     Vector2 origin = m_font->MeasureString(output.c_str()) / 2.f;

@@ -574,8 +574,8 @@ void Game::OnWindowSizeChanged(int width, int height)
 void Game::GetDefaultSize(int& width, int& height) const
 {
     // TODO: Change to desired default window size (note minimum size is 320x200).
-    width = 1600;
-    height = 900;
+    width = 1800;
+    height = 1000;
 }
 float Game::GetRotation() const
 {
@@ -762,8 +762,8 @@ void Game::CreateWindowSizeDependentResources()
     m_view = Matrix::CreateLookAt(Vector3(2.f, 2.f, 2.f),
         Vector3::Zero, Vector3::UnitY);
 
-    m_fontPos.x = size.right / 4.f;
-    m_fontPos.y = size.bottom*3 / 4.f;
+    m_fontPos.x = size.right * (1 / 2.f);
+    m_fontPos.y = size.bottom * (3 / 4.f);
 
     m_proj = Matrix::CreatePerspectiveFieldOfView(XMConvertToRadians(70.f),
         float(size.right) / float(size.bottom), 0.01f, 100.f);

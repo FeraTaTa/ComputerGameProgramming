@@ -441,20 +441,30 @@ void Game::Render()
     m_effectSun->SetMatrices(m_world, view, m_proj);
     m_effectSun->Apply(context);
     m_shape->Draw(m_effectSun.get(), m_inputLayout.Get());
-    //m_world = Matrix::Identity;
+    m_world = Matrix::Identity;
     ////3D shape ball white orbiting draw
     //earth draw
-    m_world *= Matrix::CreateTranslation(5.0f, .0f, .0f);
+    m_world *= Matrix::CreateTranslation(10.0f, .0f, .0f);
     m_world *= Matrix::CreateRotationY(rotation * toRadians);
+    Vector3 test = Vector3::Transform(Vector3(1,1,1), m_world);
+    m_effect->SetLightDirection(0, test);
+
     m_effect->SetMatrices(m_world, view, m_proj);
     m_shape->Draw(m_effect.get(), m_inputLayout.Get());
     //m_shape->Draw(m_world, view, m_proj, Colors::White, m_texture.Get());
     
     //Move and rotate the ball
-    m_world *= Matrix::CreateTranslation(2.0f, 0.0f, 0.0f);
-    m_world *= Matrix::CreateRotationZ(rotation * toRadians);// *Matrix::CreateRotationY(rotation * toRadians);
+    m_world *= Matrix::CreateRotationY(-rotation * toRadians);
+    m_world *= Matrix::CreateTranslation(-10.0f, 2.0f, .0f);
+    m_world *= Matrix::CreateRotationX(rotation * toRadians);
+
+
+    m_world *= Matrix::CreateTranslation(10.0f, 0.0f, 0.0f);
+    m_world *= Matrix::CreateRotationY(rotation * toRadians);
+    //m_world *= Matrix::CreateRotationZ(rotation * toRadians);// *Matrix::CreateRotationY(rotation * toRadians);
     m_effectAsteroid->SetMatrices(m_world, view, m_proj);
-    //m_effectAsteroid->Apply(context);
+    test = Vector3::Transform(Vector3(1, 1, 1), m_world);
+    m_effectAsteroid->SetLightDirection(0, test);
     m_shape->Draw(m_effectAsteroid.get(), m_inputLayout.Get());
     m_world = Matrix::Identity;
 
@@ -620,7 +630,7 @@ void Game::CreateDeviceDependentResources()
     m_effect->SetLightingEnabled(true);
     m_effect->SetLightEnabled(0, true);
     m_effect->SetLightDiffuseColor(0, Colors::White);
-    m_effect->SetLightDirection(0, Vector3::UnitX);
+    //m_effect->SetLightDirection(0, Vector3::UnitX);
 
     m_effectSun = std::make_unique<BasicEffect>(device);
     m_effectSun->SetTextureEnabled(true);
@@ -644,7 +654,7 @@ void Game::CreateDeviceDependentResources()
     m_effectAsteroid->SetLightingEnabled(true);
     m_effectAsteroid->SetLightEnabled(0, true);
     m_effectAsteroid->SetLightDiffuseColor(0, Colors::White);
-    m_effectAsteroid->SetLightDirection(0, Vector3::UnitX);
+    //m_effectAsteroid->SetLightDirection(0, Vector3::UnitX);
 
     
     //m_effect->SetTexture(m_sunTex.Get());

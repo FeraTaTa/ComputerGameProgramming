@@ -448,7 +448,8 @@ void Game::Render()
     m_world *= Matrix::CreateRotationY(rotation * toRadians);
     Vector3 test = Vector3::Transform(Vector3(1,1,1), m_world);
     m_effect->SetLightDirection(0, test);
-
+    float lightDistance = 1 / sqrt(test.x * test.x + test.y * test.y + test.z * test.z);
+    m_effect->SetLightDiffuseColor(0, Vector3(lightDistance, lightDistance, lightDistance));
     m_effect->SetMatrices(m_world, view, m_proj);
     m_shape->Draw(m_effect.get(), m_inputLayout.Get());
     //m_shape->Draw(m_world, view, m_proj, Colors::White, m_texture.Get());
@@ -465,6 +466,9 @@ void Game::Render()
     m_effectAsteroid->SetMatrices(m_world, view, m_proj);
     test = Vector3::Transform(Vector3(1, 1, 1), m_world);
     m_effectAsteroid->SetLightDirection(0, test);
+    lightDistance = 1 / sqrt(test.x * test.x + test.y * test.y + test.z * test.z);
+    m_effectAsteroid->SetLightDiffuseColor(0, Vector3(lightDistance, lightDistance, lightDistance));
+
     m_shape->Draw(m_effectAsteroid.get(), m_inputLayout.Get());
     m_world = Matrix::Identity;
 

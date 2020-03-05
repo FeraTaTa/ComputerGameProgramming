@@ -158,7 +158,7 @@ namespace
         None
     };
 
-    BloomPresets g_Bloom = Saturated;
+    BloomPresets g_Bloom = Default;
 
     static const VS_BLOOM_PARAMETERS g_BloomPresets[] =
     {
@@ -632,7 +632,7 @@ void Game::CreateDeviceDependentResources()
     m_effect->SetPerPixelLighting(true);
     m_effect->SetLightingEnabled(true);
     m_effect->SetLightEnabled(0, true);
-    m_effect->SetLightDiffuseColor(0, Colors::White);
+    m_effect->SetLightDiffuseColor(0, Colors::DarkCyan);
     //m_effect->SetLightDirection(0, Vector3::UnitX);
 
     m_effectSun = std::make_unique<BasicEffect>(device);
@@ -656,7 +656,7 @@ void Game::CreateDeviceDependentResources()
     m_effectAsteroid->SetPerPixelLighting(true);
     m_effectAsteroid->SetLightingEnabled(true);
     m_effectAsteroid->SetLightEnabled(0, true);
-    m_effectAsteroid->SetLightDiffuseColor(0, Colors::White);
+    m_effectAsteroid->SetLightDiffuseColor(0, Colors::LightSalmon);
     //m_effectAsteroid->SetLightDirection(0, Vector3::UnitX);
 
     

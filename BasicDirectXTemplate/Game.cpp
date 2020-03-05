@@ -628,10 +628,15 @@ void Game::CreateDeviceDependentResources()
     m_effectSun->SetLightingEnabled(true);
     m_effectSun->SetLightEnabled(0, true);
     m_effectSun->SetLightDiffuseColor(0, Colors::Orange);
-    m_effectSun->SetLightDirection(0, Vector3(1, 1, 1));
+    m_effectSun->SetLightDirection(0, Vector3(0, 0, -1));
+
     m_effectSun->SetLightEnabled(1, true);
     m_effectSun->SetLightDiffuseColor(1, Colors::Orange);
-    m_effectSun->SetLightDirection(1, -Vector3(1, 1, 1));
+    m_effectSun->SetLightDirection(1, Vector3(1, 0, 0.577f));   
+
+    m_effectSun->SetLightEnabled(2, true);
+    m_effectSun->SetLightDiffuseColor(2, Colors::Orange);
+    m_effectSun->SetLightDirection(2, Vector3(-1, 0, 0.577f));
 
     m_effectAsteroid = std::make_unique<BasicEffect>(device);
     m_effectAsteroid->SetTextureEnabled(true);

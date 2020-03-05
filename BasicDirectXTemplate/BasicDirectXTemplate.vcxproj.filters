@@ -41,6 +41,90 @@
     <Image Include="(1) Planet_Mesh_BaseColor.png">
       <Filter>Assets</Filter>
     </Image>
+    <Image Include="Spaceship\ShipLow_Engines_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Engines_AO.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Engines_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Engines_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_Emission.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Guns_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Guns_Emission.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Guns_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Guns_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Interior_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Interior_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Interior_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Pod_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Pod_AO.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Pod_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Pod_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_AO.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_Emission.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Wings_AlbedoTransparency.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Wings_Emission.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Wings_MetallicSmoothness.jpg">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Spaceship\ShipLow_Wings_Normal.jpg">
+      <Filter>Assets</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">

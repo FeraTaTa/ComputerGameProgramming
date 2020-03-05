@@ -187,6 +187,34 @@
     <Image Include="(1) Planet_Mesh_BaseColor.png" />
     <Image Include="directx.ico" />
     <Image Include="roomtexture.dds" />
+    <Image Include="Spaceship\ShipLow_Engines_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Engines_AO.jpg" />
+    <Image Include="Spaceship\ShipLow_Engines_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Engines_Normal.jpg" />
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_Emission.jpg" />
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Glass _ Trial_Normal.jpg" />
+    <Image Include="Spaceship\ShipLow_Guns_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Guns_Emission.jpg" />
+    <Image Include="Spaceship\ShipLow_Guns_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Guns_Normal.jpg" />
+    <Image Include="Spaceship\ShipLow_Interior_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Interior_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Interior_Normal.jpg" />
+    <Image Include="Spaceship\ShipLow_Pod_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Pod_AO.jpg" />
+    <Image Include="Spaceship\ShipLow_Pod_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Pod_Normal.jpg" />
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_AO.jpg" />
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_Emission.jpg" />
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Splash _ Missle_Normal.jpg" />
+    <Image Include="Spaceship\ShipLow_Wings_AlbedoTransparency.jpg" />
+    <Image Include="Spaceship\ShipLow_Wings_Emission.jpg" />
+    <Image Include="Spaceship\ShipLow_Wings_MetallicSmoothness.jpg" />
+    <Image Include="Spaceship\ShipLow_Wings_Normal.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest" />

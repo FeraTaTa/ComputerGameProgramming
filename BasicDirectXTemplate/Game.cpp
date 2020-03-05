@@ -295,7 +295,7 @@ void Game::Update(DX::StepTimer const& timer)
         m_pitch = std::max(-limit, m_pitch);
         m_pitch = std::min(+limit, m_pitch);
 
-        // keep longitude in sane range by wrapping
+        // keep longitude in same range by wrapping
         if (m_yaw > XM_PI)
         {
             m_yaw -= XM_PI * 2.0f;

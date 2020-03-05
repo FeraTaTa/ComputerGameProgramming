@@ -469,13 +469,10 @@ void Game::Render()
     m_world = Matrix::Identity;
 
     //ship draw
-    //m_world *= Matrix::CreateScale(0.0005f);
-    //m_world *= Matrix::CreateTranslation(0.0f, -1.0f, 1.0f);
-    //m_world *= Matrix::CreateRotationY(45.f * toRadians);
     //Matrix m_lightRot = Matrix::CreateTranslation(0.0f, 1.0f, -1.0f) * Matrix::CreateFromYawPitchRoll(-m_yaw, -m_pitch, -45.f* toRadians);
     //m_lightRot = m_lightRot * Matrix::CreateTranslation(0.0f, -1.0f, 1.0f);
 
-    auto quat = Quaternion::CreateFromYawPitchRoll(-m_yaw, -m_pitch, -45.f * toRadians);
+    auto quat = Quaternion::CreateFromYawPitchRoll(-m_yaw, -m_pitch, 0);// -45.f * toRadians);
     Vector3 lightDir = XMVector3Rotate(Vector3(-m_cameraPos.x, -m_cameraPos.y, -m_cameraPos.z), quat);
     ship_model->UpdateEffects([&](IEffect* effect) {
         auto lights = dynamic_cast<IEffectLights*> (effect);
@@ -489,7 +486,13 @@ void Game::Render()
 
         }
     });
-    ship_model->Draw(context, *m_states, m_world, view, m_proj);
+
+    m_world *= Matrix::CreateScale(0.05f);
+    m_world *= Matrix::CreateTranslation(0.0f, -1.0f, -1.0f);
+    XMMATRIX m_shipview = Matrix::CreateLookAt(Vector3(0.f, 1.f, -5.f),
+        Vector3::Zero, Vector3::UnitY);
+
+    ship_model->Draw(context, *m_states, m_world, m_shipview, m_proj);
     m_world = Matrix::Identity;
 
     //std::wstring output = L"x:" + std::to_wstring(lightDir.x) + L" y:" + std::to_wstring(lightDir.y) + L" z:" + std::to_wstring(lightDir.z)

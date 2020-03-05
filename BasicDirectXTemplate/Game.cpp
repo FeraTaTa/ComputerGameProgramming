@@ -248,7 +248,7 @@ void Game::Initialize(HWND window, int width, int height)
         L"King Bromeliad.wav");
     m_nightLoop = m_ambient->CreateInstance(SoundEffectInstance_Use3D);
        // | SoundEffectInstance_ReverbUseFilters);
-    m_nightLoop->SetVolume(30.0f);
+    m_nightLoop->SetVolume(7.0f);
 }
 
 #pragma region Frame Update

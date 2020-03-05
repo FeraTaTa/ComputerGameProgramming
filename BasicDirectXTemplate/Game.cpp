@@ -16,6 +16,58 @@ float rotation = 0;
 float pi = 3.14159265359f;
 float toRadians = pi / 180.0f;
 
+namespace 
+{
+    //Create effects constant buffer's structure//
+    struct cbPerObject
+    {
+        XMMATRIX  WVP;
+        XMMATRIX  World;
+    };
+
+    cbPerObject cbPerObj;
+
+    struct Light
+    {
+        Light()
+        {
+            ZeroMemory(this, sizeof(Light));
+        }
+        XMFLOAT3 dir;
+        float pad1;
+        ///////////////**************new**************////////////////////
+        XMFLOAT3 pos;
+        float range;
+        XMFLOAT3 att;
+        float pad2;
+        ///////////////**************new**************////////////////////
+        XMFLOAT4 ambient;
+        XMFLOAT4 diffuse;
+    };
+
+    Light light;
+
+    struct cbPerFrame
+    {
+        Light  light;
+    };
+
+    cbPerFrame constbuffPerFrame;
+
+    //Vertex Structure and Vertex Layout (Input Layout)//
+    struct Vertex    //Overloaded Vertex Structure
+    {
+        Vertex() {}
+        Vertex(float x, float y, float z,
+            float u, float v,
+            float nx, float ny, float nz)
+            : pos(x, y, z), texCoord(u, v), normal(nx, ny, nz) {}
+
+        XMFLOAT3 pos;
+        XMFLOAT2 texCoord;
+        XMFLOAT3 normal;
+    };
+}
 namespace
 {
     struct VS_BLOOM_PARAMETERS
@@ -308,6 +360,17 @@ void Game::Update(DX::StepTimer const& timer)
 
     //m_cameraPos = Vector3::Min(m_cameraPos, halfBound);
     //m_cameraPos = Vector3::Max(m_cameraPos, -halfBound);
+
+    
+    //Reset Lights Position
+    XMVECTOR lightVector = XMVectorSet(0.0f, 0.0f, 0.0f, 0.0f);
+
+    lightVector = XMVector3TransformCoord(lightVector, cube1World);
+
+    light.pos.x = XMVectorGetX(lightVector);
+    light.pos.y = XMVectorGetY(lightVector);
+    light.pos.z = XMVectorGetZ(lightVector);
+    
     AudioListener listener;
     listener.SetPosition(m_cameraPos);
 

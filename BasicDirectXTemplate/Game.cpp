@@ -397,13 +397,32 @@ void Game::Render()
     m_world = Matrix::Identity;
 
     //ship draw
-    m_world *= Matrix::CreateScale(0.0005f);
-    m_world *= Matrix::CreateTranslation(0.0f, -1.0f, 1.0f);
-    m_world *= Matrix::CreateRotationY(45.f * toRadians);
+    //m_world *= Matrix::CreateScale(0.0005f);
+    //m_world *= Matrix::CreateTranslation(0.0f, -1.0f, 1.0f);
+    //m_world *= Matrix::CreateRotationY(45.f * toRadians);
+
     //m_world *= Matrix::CreateRotationZ(45.f * toRadians);
     //m_world *= Matrix::CreateRotationX(15.0f * toRadians);
     //m_model->UpdateEffects(m_effect);
-    ship_model->Draw(context, *m_states, m_world, m_view, m_proj);
+
+    //Quaternion q;
+
+    ship_model->UpdateEffects([&](IEffect* effect)
+    {
+        auto lights = dynamic_cast<IEffectLights*>(effect);
+        if (lights)
+        {
+            lights->SetLightEnabled(0, true);
+            //XMVECTOR dir = XMVector3Rotate(g_XMOne, q);
+            //lights->SetLightDirection(0, -(m_cameraPos + Vector3(x, y, z)) + Vector3(0.0f, -1.0f, 1.0f));
+            lights->SetLightDirection(0,  Vector3(0,-1,0));
+            lights->SetAmbientLightColor(Colors::Blue);
+            lights->SetLightDiffuseColor(0, Colors::White);
+        }
+    });
+
+    //ship_model->Draw(context, *m_states, m_world, m_view, m_proj);
+    ship_model->Draw(context, *m_states, m_world, view, m_proj);
     m_world = Matrix::Identity;
 
 
@@ -510,6 +529,7 @@ void Game::CreateDeviceDependentResources()
     DualEffect = std::make_unique<DualTextureEffect>(device);
     DualEffect->SetVertexColorEnabled(true);
     fxFactory = std::make_unique<EffectFactory>(device);
+    m_fxFactory = std::make_unique<EffectFactory>(device);
     m_states = std::make_unique<CommonStates>(device);
     m_fxFactory = std::make_unique<EffectFactory>(device);
     PBReffect = std::make_unique<PBREffect>(device);
@@ -518,10 +538,11 @@ void Game::CreateDeviceDependentResources()
     //PBRfxFactory->
     //iEffect = std::make_unique<IEffect>(device);
     EffectFactory::EffectInfo info;
-    info.name = L"testball";
-    info.alpha = 1.f;
-    info.ambientColor = XMFLOAT3(0.2f, 0.2f, 0.2f);
-    info.diffuseColor = XMFLOAT3(0.8f, 0.8f, 0.8f);
+    
+    //info.name = L"testball";
+    //info.alpha = 1.f;
+    //info.ambientColor = XMFLOAT3(0.2f, 0.2f, 0.2f);
+    //info.diffuseColor = XMFLOAT3(0.8f, 0.8f, 0.8f);
 
     //DirectX::IEffect& effectBuilt = fxFactory->CreateEffect(info, context);
   
@@ -651,9 +672,6 @@ void Game::CreateDeviceDependentResources()
         DX::ThrowIfFailed(device->CreateBuffer(&cbDesc, nullptr,
             m_blurParamsHeight.ReleaseAndGetAddressOf()));
     }
-
-    m_view = Matrix::CreateLookAt(Vector3(0.f, 3.f, -3.f),
-        Vector3::Zero, Vector3::UnitY);
 
     //AimReticleCreateBatch();
     m_world = Matrix::Identity;

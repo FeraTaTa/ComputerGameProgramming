@@ -85,12 +85,11 @@ private:
     std::unique_ptr<DirectX::PBREffect> PBReffect;
     std::unique_ptr<DirectX::PBREffectFactory> PBRfxFactory;
 
-    std::unique_ptr<DirectX::DualTextureEffect> DualEffect;
-    std::unique_ptr<DirectX::EffectFactory> fxFactory;
+    //std::unique_ptr<DirectX::DualTextureEffect> DualEffect;
+    std::unique_ptr<DirectX::EffectFactory> m_fxFactory;
 
 
     //drawing a model
-    std::unique_ptr<DirectX::IEffectFactory> m_fxFactory;
     std::unique_ptr<DirectX::Model> ship_model;
 
     //roll matrix

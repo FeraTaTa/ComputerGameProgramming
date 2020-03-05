@@ -255,8 +255,8 @@ void Game::Initialize(HWND window, int width, int height)
 // Executes the basic game loop.
 void Game::Tick()
 {
-    if (rotation > 360) {
-        rotation = 0;
+    if (rotation > 180) {
+        rotation = -180;
     }
     rotation++;
 

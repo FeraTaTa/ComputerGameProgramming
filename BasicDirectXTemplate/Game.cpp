@@ -175,7 +175,7 @@ namespace
 
 namespace
 {
-    const XMVECTORF32 START_POSITION = { 0.f, 0.f, -5.f, 0.f };
+    const XMVECTORF32 START_POSITION = { 0.f, 0.f, -20.f, 0.f };
     const XMVECTORF32 ROOM_BOUNDS = { 50.f, 50.f, 50.f, 0.f };
     const float ROTATION_GAIN = 0.01f;
     const float MOVEMENT_GAIN = 0.07f;
